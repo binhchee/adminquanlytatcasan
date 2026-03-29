@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .hidden { display: none !important; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse-red { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] min-h-screen">
+
+<div id="authContainer" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-10">
+        <div id="loginForm">
+            <div class="text-center mb-10">
+                <div class="inline-block p-4 bg-indigo-50 rounded-3xl mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">ADMIN LOGIN</h2>
+                <p class="text-gray-400 mt-2 italic text-sm">Hệ thống quản lý SoccerPro v2.1</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="userInp" placeholder="Tên đăng nhập / SĐT" class="w-full bg-gray-50 border-2 border-transparent p-4 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                <input type="password" id="passInp" placeholder="Mật khẩu" class="w-full bg-gray-50 border-2 border-transparent p-4 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]">ĐĂNG NHẬP NGAY</button>
+                <div class="flex justify-between text-xs font-bold text-indigo-500 px-2 pt-2">
+                    <button onclick="toggleAuth('forgot')" class="hover:underline">Quên mật khẩu?</button>
+                    <button onclick="toggleAuth('register')" class="hover:underline">Tạo Admin mới</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <h2 class="text-2xl font-black text-blue-700 mb-6 uppercase">Đăng ký Admin</h2>
+            <div class="space-y-4">
+                <input type="text" id="regUser" placeholder="Tên đăng nhập" class="w-full border-2 border-gray-100 p-4 rounded-2xl outline-none">
+                <input type="text" id="regPhone" placeholder="Số điện thoại" class="w-full border-2 border-gray-100 p-4 rounded-2xl outline-none">
+                <input type="password" id="regPass" placeholder="Mật khẩu" class="w-full border-2 border-gray-100 p-4 rounded-2xl outline-none">
+                <div id="otpRegArea" class="hidden bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                    <p class="text-[10px] text-amber-700 font-bold mb-2 uppercase">Mã OTP (Mặc định: 1234)</p>
+                    <input type="text" id="regOtp" placeholder="Nhập 4 số" class="w-full bg-white border-2 border-amber-400 p-3 rounded-xl text-center font-black tracking-[1em]">
+                </div>
+                <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all">TIẾP TỤC</button>
+                <button onclick="toggleAuth('login')" class="w-full text-gray-400 text-xs mt-2 font-semibold">Quay lại đăng nhập</button>
+            </div>
+        </div>
+
+        <div id="forgotForm" class="hidden">
+            <h2 class="text-2xl font-black text-red-600 mb-6 uppercase text-center">Khôi phục</h2>
+            <input type="text" id="forInp" placeholder="Nhập SĐT đã đăng ký" class="w-full border-2 border-gray-100 p-4 rounded-2xl mb-4 outline-none">
+            <div id="otpForArea" class="hidden mb-4">
+                <input type="text" id="forOtp" placeholder="1234" class="w-full border-2 border-red-500 p-4 rounded-2xl text-center font-black tracking-widest outline-none">
+            </div>
+            <button id="forBtn" onclick="handleForgot()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-bold transition-all">GỬI YÊU CẦU</button>
+            <button onclick="toggleAuth('login')" class="w-full text-gray-400 text-xs mt-4 font-semibold text-center">Hủy bỏ</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminContent" class="hidden flex flex-col lg:flex-row min-h-screen">
+    <aside class="w-full lg:w-72 bg-slate-900 text-white p-8 flex flex-col sticky top-0 h-screen">
+        <div class="mb-12">
+            <h1 class="text-3xl font-black tracking-tighter italic">SOCCER<span class="text-indigo-400">PRO</span></h1>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-2">Quản trị hệ thống đặt sân</p>
+        </div>
+        <nav class="flex-1 space-y-3">
+            <a href="#" class="flex items-center space-x-4 bg-indigo-600 p-4 rounded-[1.5rem] font-bold transition-all shadow-lg shadow-indigo-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <div class="pt-6 text-[11px] text-slate-600 font-black uppercase px-4 tracking-widest">Quản lý đội ngũ</div>
+            <button onclick="addNewStaff()" class="w-full flex items-center space-x-4 hover:bg-slate-800 p-4 rounded-[1.5rem] font-semibold text-slate-400 hover:text-white transition-all text-sm group">
+                <span class="bg-slate-800 group-hover:bg-indigo-500 p-2 rounded-lg transition-colors">+</span>
+                <span>Thêm nhân sự</span>
+            </button>
+        </nav>
+        <button onclick="logout()" class="mt-auto bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white p-5 rounded-[1.5rem] font-bold transition-all flex items-center justify-center space-x-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <span>Đăng xuất</span>
+        </button>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-12 overflow-y-auto">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight">Chào buổi chiều!</h2>
+                <p id="currentDate" class="text-slate-400 font-medium mt-1">...</p>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Server Status</p>
+                    <p class="text-sm font-black text-emerald-500 flex items-center justify-end"><span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span> Online</p>
+                </div>
+            </div>
+        </header>
+
+        <div id="statsArea" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 space-y-10">
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-black text-slate-800 text-xl tracking-tight">👥 Đội ngũ nhân sự</h3>
+                            <p class="text-xs text-slate-400 mt-1 font-medium italic">Danh sách Admin & Nhân viên trực ca</p>
+                        </div>
+                    </div>
+                    <div class="p-4 overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[11px] text-slate-400 uppercase font-black tracking-[0.15em] border-b border-slate-50">
+                                    <th class="px-6 pb-4">Thông tin</th>
+                                    <th class="px-6 pb-4">Vai trò</th>
+                                    <th class="px-6 pb-4 text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffList" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="font-black text-slate-800 text-xl tracking-tight">📜 Nhật ký dòng tiền</h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-black uppercase tracking-widest">Cập nhật tức thì</span>
+                    </div>
+                    <div id="historyList" class="space-y-6 max-h-[700px] overflow-y-auto pr-4"></div>
+                </div>
+            </div>
+
+            <div class="space-y-10">
+                <div class="bg-slate-900 text-white rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="font-black uppercase tracking-widest mb-8 text-indigo-300 text-sm">📦 Nhập kho nhanh</h3>
+                        <div class="space-y-5">
+                            <input id="svName" placeholder="Tên sản phẩm" class="w-full bg-white/10 border border-white/5 p-5 rounded-2xl outline-none focus:bg-white focus:text-slate-900 transition-all placeholder:text-white/30 font-semibold">
+                            <div class="grid grid-cols-2 gap-4">
+                                <input id="svPrice" type="number" placeholder="Giá bán" class="bg-white/10 border border-white/5 p-5 rounded-2xl outline-none focus:bg-white focus:text-slate-900 transition-all placeholder:text-white/30 font-semibold">
+                                <input id="svStock" type="number" placeholder="Số lượng" class="bg-white/10 border border-white/5 p-5 rounded-2xl outline-none focus:bg-white focus:text-slate-900 transition-all placeholder:text-white/30 font-semibold">
+                            </div>
+                            <button onclick="addNewService()" class="w-full bg-indigo-500 text-white py-5 rounded-2xl font-black hover:bg-indigo-400 transition-all shadow-xl shadow-indigo-500/20 uppercase tracking-widest text-xs">Cập nhật kho</button>
+                        </div>
+                    </div>
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="font-black text-slate-800 uppercase tracking-tight text-sm">📊 Tồn kho hiện tại</h3>
+                    </div>
+                    <div id="serviceList" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// ==================== CORE LOGIC ====================
+let users = JSON.parse(localStorage.getItem("users")) || [
+    {user: "admin", pass: "123", role: "admin", phone: "090", email: "admin@pro.com"}
+];
+let db = JSON.parse(localStorage.getItem("db")) || [];
+let history = JSON.parse(localStorage.getItem("history")) || [];
+let services = JSON.parse(localStorage.getItem("services")) || [
+    {id:1, name:"Nước suối", price:10000, stock:5},
+    {id:2, name:"Sting dâu", price:15000, stock:30}
+];
+
+// AUTH FUNCTIONS
+function toggleAuth(type) {
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('forgotForm').classList.add('hidden');
+    document.getElementById(type + 'Form').classList.remove('hidden');
+}
+
+function handleLogin() {
+    const u = document.getElementById('userInp').value;
+    const p = document.getElementById('passInp').value;
+    const acc = users.find(x => (x.user === u || x.phone === u) && x.pass === p);
+
+    if(acc && acc.role === 'admin') {
+        sessionStorage.setItem("isAdmin", "true");
+        sessionStorage.setItem("currentUser", acc.user); // Lưu vết user đang đăng nhập
+        checkAuth();
+    } else {
+        alert("❌ Bạn không có quyền Admin hoặc sai thông tin!");
+    }
+}
+
+function handleRegister() {
+    const u = document.getElementById('regUser').value;
+    const t = document.getElementById('regPhone').value;
+    const p = document.getElementById('regPass').value;
+    const area = document.getElementById('otpRegArea');
+
+    if(!u || !p || !t) return alert("Vui lòng nhập đủ!");
+    
+    if(area.classList.contains('hidden')) {
+        area.classList.remove('hidden');
+        document.getElementById('regBtn').innerText = "XÁC NHẬN ĐĂNG KÝ";
+        alert("Mã bảo mật: 1234");
+    } else {
+        if(document.getElementById('regOtp').value === "1234") {
+            users.push({user: u, pass: p, phone: t, role: "admin", email: u+"@admin.com"});
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("✅ Tạo tài khoản Admin thành công!");
+            location.reload();
+        } else { alert("OTP không chính xác!"); }
+    }
+}
+
+function handleForgot() {
+    const phone = document.getElementById('forInp').value;
+    const area = document.getElementById('otpForArea');
+    const user = users.find(x => x.phone === phone);
+
+    if(!user) return alert("SĐT không tồn tại!");
+
+    if(area.classList.contains('hidden')) {
+        area.classList.remove('hidden');
+        document.getElementById('forBtn').innerText = "ĐỔI MẬT KHẨU";
+    } else {
+        if(document.getElementById('forOtp').value === "1234") {
+            let newP = prompt("Nhập mật khẩu mới:");
+            if(newP) {
+                user.pass = newP;
+                localStorage.setItem("users", JSON.stringify(users));
+                alert("✅ Thành công!");
+                location.reload();
+            }
+        }
+    }
+}
+
+function checkAuth() {
+    // Logic mới: Kiểm tra nếu user hiện tại còn tồn tại trong DB không
+    const currentSessionUser = sessionStorage.getItem("currentUser");
+    const userExists = users.find(x => x.user === currentSessionUser);
+
+    if(!userExists && currentSessionUser) {
+        logout();
+        return;
+    }
+
+    if(sessionStorage.getItem("isAdmin") === "true") {
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
+        render();
+    }
+}
+
+function logout() { sessionStorage.clear(); location.reload(); }
+
+function addNewStaff() {
+    let u = prompt("Tên đăng nhập:");
+    let p = prompt("Mật khẩu:");
+    let t = prompt("SĐT:");
+    if(!u || !p) return;
+    users.push({user: u, pass: p, phone: t, role: "staff", email: u+"@soccerpro.com"});
+    localStorage.setItem("users", JSON.stringify(users));
+    render();
+}
+
+function editStaff(uName) {
+    let staff = users.find(x => x.user === uName);
+    let nPass = prompt("Mật khẩu mới cho " + uName + ":", staff.pass);
+    if(nPass) { staff.pass = nPass; localStorage.setItem("users", JSON.stringify(users)); render(); }
+}
+
+function deleteStaff(uName) {
+    if(uName === 'admin') return alert("Cấm xóa Admin gốc!");
+    if(confirm("Xóa nhân sự " + uName + "?")) {
+        users = users.filter(x => x.user !== uName);
+        localStorage.setItem("users", JSON.stringify(users));
+        
+        // Ghi dấu xóa để các tab khác đồng bộ
+        localStorage.setItem("lastDeletedUser", uName); 
+        
+        render();
+    }
+}
+
+function editService(id) {
+    let s = services.find(x => x.id === id);
+    let newName = prompt("Sửa tên sản phẩm:", s.name);
+    let newPrice = prompt("Sửa giá bán:", s.price);
+    let newStock = prompt("Sửa số lượng tồn kho:", s.stock);
+    
+    if (newName) s.name = newName;
+    if (newPrice) s.price = parseInt(newPrice);
+    if (newStock) s.stock = parseInt(newStock);
+    
+    localStorage.setItem("services", JSON.stringify(services));
+    render();
+}
+
+function addNewService() {
+    let n = document.getElementById('svName').value;
+    let p = parseInt(document.getElementById('svPrice').value);
+    let s = parseInt(document.getElementById('svStock').value);
+    if(!n || !p) return alert("Nhập tên và giá!");
+
+    let existing = services.find(x => x.name.toLowerCase() === n.toLowerCase());
+    if(existing) {
+        existing.stock += (s || 0);
+        existing.price = p;
+    } else {
+        services.push({id: Date.now(), name: n, price: p, stock: s || 0});
+    }
+    localStorage.setItem("services", JSON.stringify(services));
+    render();
+    ['svName','svPrice','svStock'].forEach(id => document.getElementById(id).value = '');
+}
+
+function deleteService(id) {
+    if(confirm("Xóa sản phẩm này?")) {
+        services = services.filter(x => x.id !== id);
+        localStorage.setItem("services", JSON.stringify(services));
+        render();
+    }
+}
+
+function deleteHistory(id) {
+    if(confirm("Xóa bản ghi này?")) {
+        history = history.filter(x => x.id !== id);
+        localStorage.setItem("history", JSON.stringify(history));
+        render();
+    }
+}
+
+function render() {
+    let totalRevenue = history.filter(h => h.type === "PAY").reduce((s, h) => s + h.total, 0);
+    let totalRefund = history.filter(h => h.type === "REFUND").reduce((s, h) => s + h.total, 0);
+    
+    document.getElementById('statsArea').innerHTML = `
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Tổng Thu</p>
+            </div>
+            <p class="text-3xl font-black text-slate-900">${totalRevenue.toLocaleString()}đ</p>
+        </div>
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="p-3 bg-rose-50 rounded-2xl text-rose-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" /></svg>
+                </div>
+                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Hoàn trả</p>
+            </div>
+            <p class="text-3xl font-black text-rose-500">${totalRefund.toLocaleString()}đ</p>
+        </div>
+        <div class="bg-indigo-600 p-8 rounded-[2.5rem] shadow-2xl shadow-indigo-200 card-hover text-white">
+            <p class="text-[11px] font-black text-indigo-200 uppercase tracking-widest mb-4 italic">Lợi nhuận thực</p>
+            <p class="text-3xl font-black italic">${(totalRevenue - totalRefund).toLocaleString()}đ</p>
+        </div>
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="p-3 bg-slate-100 rounded-2xl text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Đội ngũ</p>
+            </div>
+            <p class="text-3xl font-black text-slate-900">${users.length}</p>
+        </div>
+    `;
+
+    document.getElementById('staffList').innerHTML = users.map(u => `
+        <tr class="hover:bg-slate-50 transition-all">
+            <td class="px-6 py-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-sm">${u.user[0].toUpperCase()}</div>
+                    <div>
+                        <p class="font-bold text-slate-800 text-base">${u.user}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">${u.phone || 'Chưa cập nhật'}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-6">
+                <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${u.role==='admin'?'bg-rose-100 text-rose-600':'bg-sky-100 text-sky-600'}">
+                    ${u.role}
+                </span>
+            </td>
+            <td class="px-6 py-6 text-right">
+                <button onclick="editStaff('${u.user}')" class="text-indigo-400 hover:text-indigo-600 p-2 transition-all mr-2">Sửa</button>
+                <button onclick="deleteStaff('${u.user}')" class="text-slate-300 hover:text-rose-600 p-2 transition-all">Xóa</button>
+            </td>
+        </tr>`).join("");
+
+    document.getElementById('serviceList').innerHTML = services.map(s => {
+        const isLow = s.stock < 10;
+        return `
+        <div class="flex justify-between items-center p-5 ${isLow ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'} rounded-[1.5rem] border group transition-all hover:bg-white hover:shadow-lg">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 ${isLow ? 'bg-rose-500' : 'bg-indigo-500'} rounded-2xl text-white shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-black text-slate-800">${s.name}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${s.price.toLocaleString()}đ</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="text-right">
+                    <p class="text-base font-black ${isLow ? 'text-rose-600 animate-pulse-red' : 'text-slate-900'}">${s.stock}</p>
+                    <p class="text-[9px] text-slate-400 font-black uppercase tracking-tighter">Còn lại</p>
+                </div>
+                <div class="flex space-x-1">
+                    <button onclick="editService(${s.id})" class="text-indigo-400 hover:text-indigo-600 p-1 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onclick="deleteService(${s.id})" class="text-slate-300 hover:text-rose-500 transition-all p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join("") || `<p class="text-center py-10 text-slate-300 italic">Trống...</p>`;
+
+    document.getElementById('historyList').innerHTML = history.slice().reverse().map(h => {
+        const isPay = h.type === 'PAY';
+        
+        // --- LOGIC PHÂN LOẠI TIỀN ---
+        let displayMoneyType = "Trả sau / Tại sân";
+        let displayAmount = 0;
+
+        if (h.payment === 'deposit') {
+            displayMoneyType = "Cọc trước 130k (giảm 20k)";
+            displayAmount = 130000;
+        } else if (h.payment === 'online') {
+            let [hour] = h.time.split(":").map(Number);
+            displayMoneyType = hour >= 16 ? "Online 100% (420k)" : "Online 100% (320k)";
+            displayAmount = hour >= 16 ? 420000 : 320000;
+        }
+
+        return `
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 relative group hover:shadow-2xl transition-all overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full ${isPay ? 'bg-emerald-500' : 'bg-rose-500'}"></div>
+            <button onclick="deleteHistory(${h.id})" class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 transition-all">×</button>
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl ${isPay ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'} tracking-widest">
+                        ${isPay ? 'NHẬN TIỀN' : 'HOÀN TRẢ'}
+                    </span>
+                    <span class="text-[11px] text-slate-300 font-bold italic">ID: #${h.id.toString().slice(-4)}</span>
+                </div>
+                <p class="text-2xl font-black ${isPay ? 'text-emerald-600' : 'text-rose-600'}">
+                    ${isPay ? '+' : '-'}${h.total.toLocaleString()}đ
+                </p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-4">
+                <div>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Khách / STK hoàn</p>
+                    <p class="text-sm font-black text-slate-800 tracking-tight">${h.name}</p>
+                    <p class="text-[10px] font-bold text-indigo-500 break-all">${h.account || 'N/A'}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Sân & Giờ đặt</p>
+                    <p class="text-sm font-black text-slate-800 underline decoration-indigo-200 decoration-2">${h.field}</p>
+                    <p class="text-[10px] font-bold text-rose-500 italic">⏰ ${h.time} (${h.date})</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">P.Thức / Tiền sân</p>
+                    <p class="text-sm font-black text-emerald-600">${displayAmount > 0 ? displayAmount.toLocaleString() + 'đ' : '0đ'}</p>
+                    <p class="text-[9px] font-bold text-sky-500 uppercase">${displayMoneyType}</p>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-2xl mb-4">
+                <p class="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2">Chi tiết dịch vụ đã dùng</p>
+                <div class="flex flex-wrap gap-2">
+                    ${h.services && h.services.length > 0 
+                        ? h.services.map(s => `<span class="bg-white px-3 py-1 rounded-lg border border-slate-200 text-xs font-bold text-slate-600">${s.name} x${s.qty} (${(s.price * s.qty).toLocaleString()}đ)</span>`).join("") 
+                        : '<span class="text-xs text-slate-400 italic">Không dùng thêm dịch vụ</span>'}
+                </div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-400 font-medium">
+                <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Kết toán: ${h.doneTime}</span>
+                <span class="text-[10px] italic">STK khách: ${h.account || 'Không để lại'}</span>
+            </div>
+        </div>`;
+    }).join("") || `<p class="text-center py-20 text-slate-300 italic">Chưa ghi nhận giao dịch...</p>`;
+}
+
+function updateDate() {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('vi-VN', options);
+}
+
+// KHỞI CHẠY
+updateDate();
+checkAuth();
+
+// Lắng nghe thay đổi dữ liệu từ các trang khác (Nhân viên/Khách)
+window.addEventListener('storage', () => {
+    users = JSON.parse(localStorage.getItem("users")) || [];
+    db = JSON.parse(localStorage.getItem("db")) || [];
+    history = JSON.parse(localStorage.getItem("history")) || [];
+    services = JSON.parse(localStorage.getItem("services")) || [];
+    
+    // Kiểm tra ngay lập tức xem tài khoản hiện tại có bị xóa không
+    checkAuth();
+    
+    if(sessionStorage.getItem("isAdmin") === "true") render();
+});
+
+</script>
+</body>
+</html>
