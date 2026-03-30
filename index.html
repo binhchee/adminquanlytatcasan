@@ -521,38 +521,6 @@ window.addEventListener('storage', () => {
     if(sessionStorage.getItem("isAdmin") === "true") render();
 });
 
-<script>
-// ====== THÊM SĐT KHÁCH VÀO NHẬT KÝ ======
-function addPhoneToHistoryUI() {
-    const items = document.querySelectorAll('#historyList > div');
-
-    items.forEach((el, index) => {
-        const h = history.slice().reverse()[index];
-        if (!h) return;
-
-        // Nếu không có SĐT thì bỏ qua
-        if (!h.phone) return;
-
-        // Tìm block chứa thông tin khách
-        const infoBlock = el.querySelector('.grid div');
-
-        // Tránh bị lặp
-        if (infoBlock && !el.innerHTML.includes('📞')) {
-            infoBlock.innerHTML += `
-                <p class="text-[10px] font-bold text-emerald-500 mt-1">📞 ${h.phone}</p>
-            `;
-        }
-    });
-}
-
-// Hook vào render mà KHÔNG sửa render gốc
-const oldRender = render;
-render = function() {
-    oldRender();
-    setTimeout(addPhoneToHistoryUI, 100);
-};
-</script>
-
     // Lệnh này luôn trực chiến, hễ có đơn là tự chạy
 refDonHang.on('value', (snapshot) => {
     const tatCaDonHang = snapshot.val();
